@@ -8,11 +8,21 @@ import '../models/product.dart';
 class ProductGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final List<Product> loadedProducts = Provider.of<Products>(context).items;
+    final List<Product> products = Provider.of<Products>(context).items;
+
     return GridView.builder(
       padding: const EdgeInsets.all(10),
-      itemCount: loadedProducts.length,
-      itemBuilder: (ctx, i) => ProductItem(loadedProducts[i]),
+      itemCount: products.length,
+      itemBuilder: (ctx, i) => ChangeNotifierProvider.value(
+        /*
+        Segundo a documentação é recomendado que se o Provider já tiver sido criado
+        como no caso dos produtos que foram criados em DUMMY_DATA
+        é recomendado que se utilize o construtor ChangeNotifierProvider.value
+        E se substitua o create por value
+        */
+        value: products[i],
+        child: ProductItem(),
+      ),
       /*
       Grid rolável com contagem cruzada fixa...
       um widget q irá controlar o builder para que na horizontal (crossAxis)
