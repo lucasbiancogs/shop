@@ -18,10 +18,14 @@ class CartItem {
 }
 
 class Cart with ChangeNotifier {
-  Map<String, CartItem> _items;
+  Map<String, CartItem> _items = {};
 
   Map<String, CartItem> get item {
     return {..._items};
+  }
+
+  int get itemCount {
+    return _items.length;
   }
 
   void addItem(Product product) {
@@ -42,12 +46,13 @@ class Cart with ChangeNotifier {
     } else {
       _items.putIfAbsent(product.id, () {
         return CartItem(
-          id: Random().nextDouble().toString(),
-          title: product.title,
-          quantity: 1,
-          price: product.price
-        );
+            id: Random().nextDouble().toString(),
+            title: product.title,
+            quantity: 1,
+            price: product.price);
       });
     }
+
+    notifyListeners();
   }
 }
