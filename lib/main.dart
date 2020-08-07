@@ -22,13 +22,13 @@ class MyApp extends StatelessWidget {
       */
       providers: [
         ChangeNotifierProvider(
-          create: (_) => Products(),
+          create: (_) => new Products(),
         ),
         ChangeNotifierProvider(
-          create: (_) => Cart(),
+          create: (_) => new Cart(),
         ),
         ChangeNotifierProvider(
-          create: (_) => Orders(),
+          create: (_) => new Orders(),
         )
       ],
       child: MaterialApp(
