@@ -39,11 +39,29 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
             },
             itemBuilder: (_) => [
               PopupMenuItem(
-                child: Text('Somente Favoritos'),
+                child: Row(
+                  children: <Widget>[
+                    Icon(
+                      Icons.favorite,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    SizedBox(width: 5),
+                    Text('Somente Favoritos'),
+                  ],
+                ),
                 value: FilterOptions.Favorite,
               ),
               PopupMenuItem(
-                child: Text('Todos'),
+                child: Row(
+                  children: <Widget>[
+                    Icon(
+                      Icons.favorite_border,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    SizedBox(width: 5),
+                    Text('Todos'),
+                  ],
+                ),
                 value: FilterOptions.All,
               ),
             ],

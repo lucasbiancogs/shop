@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Minha Loja',
         theme: ThemeData(
-          primarySwatch: Colors.deepPurple,
+          primarySwatch: Colors.teal,
           accentColor: Colors.deepOrange,
           fontFamily: 'Lato',
         ),
