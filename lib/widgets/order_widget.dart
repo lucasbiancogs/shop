@@ -6,11 +6,10 @@ import '../providers/orders.dart';
 class OrderWidget extends StatefulWidget {
   final Order order;
 
-  OrderWidget(this.order) {
-  }
+  OrderWidget(this.order);
 
   double get listSize {
-  return (order.products.length * 25.0) + 10;
+    return (order.products.length * 25.0) + 10;
   }
 
   @override

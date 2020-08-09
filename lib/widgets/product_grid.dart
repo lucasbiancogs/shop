@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/products.dart';
-import '../widgets/product_item.dart';
+import 'product_grid_item.dart';
 import '../providers/product.dart';
 
 class ProductGrid extends StatelessWidget {
@@ -28,7 +28,7 @@ class ProductGrid extends StatelessWidget {
         E se substitua o create por value
         */
         value: products[i],
-        child: ProductItem(),
+        child: ProductGridItem(),
       ),
       /*
       Grid rolável com contagem cruzada fixa...

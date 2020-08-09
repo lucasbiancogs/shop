@@ -24,10 +24,14 @@ class Products with ChangeNotifier {
 
   List<Product> get items => [..._items];
 
+  int get itemsCount {
+    return _items.length;
+  }
+
   List<Product> get favoriteItems =>
       _items.where((prod) => prod.isFavorite).toList();
 
-  void _addProduct(Product product) {
+  void addProduct(Product product) {
     _items.add(product);
     /*
     Nesse ponto que ele irá notificar todos os interessados
