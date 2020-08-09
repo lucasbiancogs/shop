@@ -6,10 +6,10 @@ class ProductFormScreen extends StatefulWidget {
 }
 
 class _ProductFormScreenState extends State<ProductFormScreen> {
-  final _titleFocusNode = FocusNode();
   final _priceFocusNode = FocusNode();
   final _descriptionFocusNode = FocusNode();
   final _imageURLFocusNode = FocusNode();
+  final _imageURLController = TextEditingController();
 
   @override
   void initState() {
@@ -19,30 +19,30 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     como a necessidade de controles, usando Listeners
 
     Porém, como se deseja atualizar a imagem assim que inserido seu URL
-    é necessário inserir um Listener
+    é necessário inserir um Listener e um Controller
     */
-    _imageURLFocusNode.addListener(() {
-      print('Mudou');
-    });
+    _imageURLFocusNode.addListener(_updateImage);
+  }
+
+  void _updateImage() {
+    /*
+    Vamos usar o setState vazio para somente atualizar o estado
+    ao ouvir o listener
+    */
+    setState(() {});
   }
 
   @override
   void dispose() {
     super.dispose();
-    _titleFocusNode.dispose();
     _priceFocusNode.dispose();
     _descriptionFocusNode.dispose();
+    _imageURLFocusNode.removeListener(_updateImage);
     _imageURLFocusNode.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    /*
-    Fiz isso basicamente para que ao abrir o formulário já vá direto para a aba
-    de título
-    */
-    FocusScope.of(context).requestFocus(_titleFocusNode);
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Adicionar Produto'),
@@ -55,7 +55,6 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               TextFormField(
                 decoration: InputDecoration(labelText: 'Título'),
                 textInputAction: TextInputAction.next,
-                focusNode: _titleFocusNode,
                 onFieldSubmitted: (_) {
                   /*
                   Basicamente substituimos o concluído por seguinte no teclado
@@ -89,6 +88,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                       keyboardType: TextInputType.url,
                       textInputAction: TextInputAction.done,
                       focusNode: _imageURLFocusNode,
+                      controller: _imageURLController,
                     ),
                   ),
                   Container(
@@ -105,7 +105,14 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                       ),
                     ),
                     alignment: Alignment.center,
-                    child: Text('Informe a URL'),
+                    child: _imageURLController.text.isEmpty
+                        ? Text('Informe a URL')
+                        : FittedBox(
+                            child: Image.network(
+                              _imageURLController.text,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                   ),
                 ],
               ),
