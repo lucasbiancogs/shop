@@ -38,15 +38,41 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   }
 
   void _updateImage() {
+    //print(isValidImageUrl(_imageURLController.text));
+    if (isValidImageUrl(_imageURLController.text)) {
+      setState(() {});
+    }
     /*
     Vamos usar o setState vazio para somente atualizar o estado
     ao ouvir o listener
     */
-    setState(() {});
+  }
+
+  bool isValidImageUrl(String url) {
+    bool isValidProtocolHttp = url.toLowerCase().startsWith('http://');
+    bool isValidProtocolHttps = url.toLowerCase().startsWith('https://');
+
+    bool isValidExtensionPng = url.toLowerCase().endsWith('.png');
+    bool isValidExtensionJpg = url.toLowerCase().endsWith('.jpg');
+    bool isValidExtensionJpeg = url.toLowerCase().endsWith('.jpeg');
+
+    return (isValidProtocolHttp || isValidProtocolHttps) &&
+        (isValidExtensionPng || isValidExtensionJpg || isValidExtensionJpeg);
   }
 
   void _saveForm() {
+    /*
+    Caso algo volte diferente de nulo, ele irá se tornar false e não
+    salvará o estado do formulário
+    */
+    bool isValid = _form.currentState.validate();
+
+    if (!isValid) {
+      return;
+    }
+
     _form.currentState.save();
+
     final newProduct = Product(
       id: Random().nextDouble().toString(),
       title: _formData['title'],
@@ -54,9 +80,6 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       description: _formData['description'],
       imageUrl: _formData['imageUrl'],
     );
-    print(newProduct.id);
-    print(newProduct.price);
-    print(newProduct.title);
   }
 
   @override
@@ -98,6 +121,15 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   FocusScope.of(context).requestFocus(_priceFocusNode);
                 },
                 onSaved: (value) => _formData['title'] = value,
+                validator: (value) {
+                  bool isEmpty = value.trim().isEmpty;
+                  bool isInvalid = value.trim().length < 3;
+                  if (isEmpty || isInvalid) {
+                    return 'Informe um título válido com pelo menos 3 caracteres!';
+                  }
+
+                  return null;
+                },
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Preço'),
@@ -108,6 +140,17 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   FocusScope.of(context).requestFocus(_descriptionFocusNode);
                 },
                 onSaved: (value) => _formData['price'] = double.parse(value),
+                validator: (value) {
+                  bool isEmpty = value.trim().isEmpty;
+                  double newPrice = double.tryParse(value);
+                  bool isInvalid = newPrice == null || newPrice <= 0.0;
+
+                  if (isEmpty || isInvalid) {
+                    return 'Informe um preço válido!';
+                  }
+
+                  return null;
+                },
               ),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Descrição'),
@@ -115,6 +158,15 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 keyboardType: TextInputType.multiline,
                 focusNode: _descriptionFocusNode,
                 onSaved: (value) => _formData['description'] = value,
+                validator: (value) {
+                  bool isEmpty = value.trim().isEmpty;
+                  bool isInvalid = value.trim().length < 10;
+                  if (isEmpty || isInvalid) {
+                    return 'Informe uma descrição válida com pelo menos 10 caracteres!';
+                  }
+
+                  return null;
+                },
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -130,6 +182,15 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                         _saveForm();
                       },
                       onSaved: (value) => _formData['imageUrl'] = value,
+                      validator: (value) {
+                        bool isEmpty = value.trim().isEmpty;
+                        bool isInvalid = !isValidImageUrl(value);
+                        if (isEmpty || isInvalid) {
+                          return 'Informe uma URL válida!';
+                        }
+
+                        return null;
+                      },
                     ),
                   ),
                   Container(
