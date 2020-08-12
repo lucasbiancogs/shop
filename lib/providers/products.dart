@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'product.dart';
 import '../data/dummy_data.dart';
@@ -31,30 +33,32 @@ class Products with ChangeNotifier {
   List<Product> get favoriteItems =>
       _items.where((prod) => prod.isFavorite).toList();
 
-  void addProduct(Product product) {
-    _items.add(product);
+  void addProduct(Product newProduct) {
+    _items.add(Product(
+      id: Random().nextDouble().toString(),
+      title: newProduct.title,
+      description: newProduct.description,
+      price: newProduct.price,
+      imageUrl: newProduct.imageUrl,
+    ));
     /*
     Nesse ponto que ele irá notificar todos os interessados
     */
     notifyListeners();
   }
+
+  void updateProduct(Product product) {
+    if (product == null && product.id == null) {
+      // Caso o produto não esteja setado
+      return;
+    }
+
+    final index = _items.indexWhere((prod) => prod.id == product.id);
+
+    if (index >= 0) {
+      _items[index] = product;
+
+      notifyListeners();
+    }
+  }
 }
-
-// bool _showFavoriteOnly = false;
-
-// List<Product> get items {
-//   if (_showFavoriteOnly) {
-//     return _items.where((prod) => prod.isFavorite).toList();
-//   }
-//   return [..._items];
-// }
-
-// void showFavoriteOnly() {
-//   _showFavoriteOnly = true;
-//   notifyListeners();
-// }
-
-// void showAll() {
-//   _showFavoriteOnly = false;
-//   notifyListeners();
-// }
