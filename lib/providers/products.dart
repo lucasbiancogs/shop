@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:math';
-
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+
 import 'product.dart';
 import '../data/dummy_data.dart';
 
@@ -34,17 +36,42 @@ class Products with ChangeNotifier {
       _items.where((prod) => prod.isFavorite).toList();
 
   void addProduct(Product newProduct) {
-    _items.add(Product(
-      id: Random().nextDouble().toString(),
-      title: newProduct.title,
-      description: newProduct.description,
-      price: newProduct.price,
-      imageUrl: newProduct.imageUrl,
-    ));
+    const url = 'https://shop-lucasbianco.firebaseio.com/products.json';
+
     /*
+    Usando essa biblioteca http é simples de fazer as suas requisições
+    o nome http antes das requisições é opcional mas ajuda a identificá-las
+
+    Para fazer a requisição é necessário um json e para isso se usa o
+    json.encode() que pega um map como entrada
+
+    Uma API Rest comum em sua Url terminaria com /products, porém,
+    é uma regra do RealTime DataBase da Firebase terminar com .json
+    */
+    http
+        .post(
+      url,
+      body: json.encode({
+        'title': newProduct.title,
+        'description': newProduct.description,
+        'price': newProduct.price,
+        'imageUrl': newProduct.imageUrl,
+        'isFavorite': newProduct.isFavorite,
+      }),
+    )
+        .then((response) {
+      _items.add(Product(
+        id: json.decode(response.body)['name'],
+        title: newProduct.title,
+        description: newProduct.description,
+        price: newProduct.price,
+        imageUrl: newProduct.imageUrl,
+      ));
+      /*
     Nesse ponto que ele irá notificar todos os interessados
     */
-    notifyListeners();
+      notifyListeners();
+    });
   }
 
   void updateProduct(Product product) {

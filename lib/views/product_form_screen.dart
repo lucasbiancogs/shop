@@ -128,9 +128,12 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    bool isAdd = ModalRoute.of(context).settings.arguments == null;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Adicionar Produto'),
+        title: Text(isAdd
+        ? 'Adicionar Produto'
+        : 'Editar Produto'),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.check),
@@ -247,11 +250,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                       alignment: Alignment.center,
                       child: _imageURLController.text.isEmpty
                           ? Text('Informe a URL')
-                          : FittedBox(
-                              child: Image.network(
-                                _imageURLController.text,
-                                fit: BoxFit.cover,
-                              ),
+                          : Image.network(
+                              _imageURLController.text,
+                              fit: BoxFit.cover,
                             )),
                 ],
               ),
