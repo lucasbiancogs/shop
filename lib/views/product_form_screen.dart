@@ -23,6 +23,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   */
   final _form = GlobalKey<FormState>();
   final _formData = Map<String, Object>();
+  bool _isLoading = false;
 
   @override
   void didChangeDependencies() {
@@ -104,17 +105,29 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       imageUrl: _formData['imageUrl'],
     );
 
+    setState(() {
+      _isLoading = true;
+    });
+
     /*
     É possível usar um provider fora do contexto de um build
     porém, ele não pode ser listen: true
     */
     final products = Provider.of<Products>(context, listen: false);
     if (_formData['id'] == null) {
-      products.addProduct(product);
+      products.addProduct(product).then((_) {
+        setState(() {
+          _isLoading = false;
+        });
+        Navigator.of(context).pop();
+      });
     } else {
+      setState(() {
+        _isLoading = false;
+      });
       products.updateProduct(product);
+      Navigator.of(context).pop();
     }
-    Navigator.of(context).pop();
   }
 
   @override
@@ -131,9 +144,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     bool isAdd = ModalRoute.of(context).settings.arguments == null;
     return Scaffold(
       appBar: AppBar(
-        title: Text(isAdd
-        ? 'Adicionar Produto'
-        : 'Editar Produto'),
+        title: Text(isAdd ? 'Adicionar Produto' : 'Editar Produto'),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.check),
@@ -141,7 +152,11 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           )
         ],
       ),
-      body: Padding(
+      body: _isLoading
+      ? Center(
+        child: CircularProgressIndicator(),
+      )
+      : Padding(
         padding: const EdgeInsets.all(15),
         child: Form(
           key: _form,

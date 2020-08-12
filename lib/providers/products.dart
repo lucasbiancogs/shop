@@ -35,7 +35,7 @@ class Products with ChangeNotifier {
   List<Product> get favoriteItems =>
       _items.where((prod) => prod.isFavorite).toList();
 
-  void addProduct(Product newProduct) {
+  Future<void> addProduct(Product newProduct) {
     const url = 'https://shop-lucasbianco.firebaseio.com/products.json';
 
     /*
@@ -47,8 +47,22 @@ class Products with ChangeNotifier {
 
     Uma API Rest comum em sua Url terminaria com /products, porém,
     é uma regra do RealTime DataBase da Firebase terminar com .json
+
+    --- Future ---
+
+    No caso o método foi alterado para um Future, assim, podendo executar o pop()
+    de forma assíncrona
+
+    Por ser um Future<void> existem diversos pontos em que se pode retornar o
+    Future.value()
+
+    Ao retornar todo o bloco de requisições http, é como se estivessemos
+    permitindo o chaveamento do próximo then
+    ou seja
+    Ele executará o post, executará o then
+    e depois ele executará o then assossiado à função addProduct
     */
-    http
+    return http
         .post(
       url,
       body: json.encode({
