@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
@@ -35,9 +34,7 @@ class Products with ChangeNotifier {
   List<Product> get favoriteItems =>
       _items.where((prod) => prod.isFavorite).toList();
 
-  Future<void> addProduct(Product newProduct) {
-    const url = 'https://shop-lucasbianco.firebaseio.com/products.json';
-
+  Future<void> addProduct(Product newProduct) async {
     /*
     Usando essa biblioteca http é simples de fazer as suas requisições
     o nome http antes das requisições é opcional mas ajuda a identificá-las
@@ -53,17 +50,20 @@ class Products with ChangeNotifier {
     No caso o método foi alterado para um Future, assim, podendo executar o pop()
     de forma assíncrona
 
-    Por ser um Future<void> existem diversos pontos em que se pode retornar o
-    Future.value()
-
     Ao retornar todo o bloco de requisições http, é como se estivessemos
     permitindo o chaveamento do próximo then
     ou seja
     Ele executará o post, executará o then
     e depois ele executará o then assossiado à função addProduct
+
+    Um outro modo de fazer é usando o async/await
+    Para isso é necessário marcar o método como async e o que estiver marcado como await
+    será executado antes de prosseguir fazendo com que fique uma aparência
+    mais síncrona
     */
-    return http
-        .post(
+    const url = 'https://shop-lucasbianco.firebaseio.com/products.json';
+
+    final response = await http.post(
       url,
       body: json.encode({
         'title': newProduct.title,
@@ -72,8 +72,8 @@ class Products with ChangeNotifier {
         'imageUrl': newProduct.imageUrl,
         'isFavorite': newProduct.isFavorite,
       }),
-    )
-        .then((response) {
+    );
+
       _items.add(Product(
         id: json.decode(response.body)['name'],
         title: newProduct.title,
@@ -85,7 +85,6 @@ class Products with ChangeNotifier {
     Nesse ponto que ele irá notificar todos os interessados
     */
       notifyListeners();
-    });
   }
 
   void updateProduct(Product product) {
