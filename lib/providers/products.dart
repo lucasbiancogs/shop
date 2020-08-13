@@ -3,9 +3,9 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
 import 'product.dart';
-import '../data/dummy_data.dart';
 
 class Products with ChangeNotifier {
+  final String _url = 'https://shop-lucasbianco.firebaseio.com/products.json';
   /*
   Esse mixin ChangeNotifier está fortemente atrelado ao design pattern 
   de observers
@@ -15,7 +15,7 @@ class Products with ChangeNotifier {
   O catálogo será notificado e irá se atualizar para refletir isso
   */
 
-  List<Product> _items = DUMMY_PRODUCTS;
+  List<Product> _items = [];
 
   /*
   É importante copiar a lista através de um spread para devolvê-la em um getter
@@ -33,6 +33,28 @@ class Products with ChangeNotifier {
 
   List<Product> get favoriteItems =>
       _items.where((prod) => prod.isFavorite).toList();
+
+  Future<void> loadProducts() async {
+    final response = await http.get(_url);
+    Map<String, dynamic> data = json.decode(response.body);
+
+    _items.clear();
+
+    if (data != null) {
+      data.forEach((productId, productData) {
+        _items.add(Product(
+          id: productId,
+          title: productData['title'],
+          description: productData['description'],
+          price: productData['price'],
+          imageUrl: productData['imageUrl'],
+        ));
+      });
+
+      notifyListeners();
+    }
+    return Future.value();
+  }
 
   Future<void> addProduct(Product newProduct) async {
     /*
@@ -61,10 +83,8 @@ class Products with ChangeNotifier {
     será executado antes de prosseguir fazendo com que fique uma aparência
     mais síncrona
     */
-    const url = 'https://shop-lucasbianco.firebaseio.com/products.json';
-
     final response = await http.post(
-      url,
+      _url,
       body: json.encode({
         'title': newProduct.title,
         'description': newProduct.description,
@@ -74,17 +94,17 @@ class Products with ChangeNotifier {
       }),
     );
 
-      _items.add(Product(
-        id: json.decode(response.body)['name'],
-        title: newProduct.title,
-        description: newProduct.description,
-        price: newProduct.price,
-        imageUrl: newProduct.imageUrl,
-      ));
-      /*
+    _items.add(Product(
+      id: json.decode(response.body)['name'],
+      title: newProduct.title,
+      description: newProduct.description,
+      price: newProduct.price,
+      imageUrl: newProduct.imageUrl,
+    ));
+    /*
     Nesse ponto que ele irá notificar todos os interessados
     */
-      notifyListeners();
+    notifyListeners();
   }
 
   void updateProduct(Product product) {
