@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'product.dart';
 
 class Products with ChangeNotifier {
-  final String _url = 'https://shop-lucasbianco.firebaseio.com/products.json';
+  final String _baseUrl = 'https://shop-lucasbianco.firebaseio.com/products';
   /*
   Esse mixin ChangeNotifier está fortemente atrelado ao design pattern 
   de observers
@@ -35,7 +35,7 @@ class Products with ChangeNotifier {
       _items.where((prod) => prod.isFavorite).toList();
 
   Future<void> loadProducts() async {
-    final response = await http.get(_url);
+    final response = await http.get("$_baseUrl.json");
     Map<String, dynamic> data = json.decode(response.body);
 
     _items.clear();
@@ -84,7 +84,7 @@ class Products with ChangeNotifier {
     mais síncrona
     */
     final response = await http.post(
-      _url,
+      "$_baseUrl.json",
       body: json.encode({
         'title': newProduct.title,
         'description': newProduct.description,
@@ -107,7 +107,7 @@ class Products with ChangeNotifier {
     notifyListeners();
   }
 
-  void updateProduct(Product product) {
+  Future<void> updateProduct(Product product) async {
     if (product == null && product.id == null) {
       // Caso o produto não esteja setado
       return;
@@ -116,6 +116,15 @@ class Products with ChangeNotifier {
     final index = _items.indexWhere((prod) => prod.id == product.id);
 
     if (index >= 0) {
+      await http.patch(
+        "$_baseUrl/${product.id}.json",
+        body: json.encode({
+          'title': product.title,
+          'description': product.description,
+          'price': product.price,
+          'imageUrl': product.imageUrl,
+        }),
+      );
       _items[index] = product;
 
       notifyListeners();
