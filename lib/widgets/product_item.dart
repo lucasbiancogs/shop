@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../exceptions/http_exception.dart';
 import '../utils/app_routes.dart';
 import '../providers/product.dart';
 import '../providers/products.dart';
@@ -12,6 +13,9 @@ class ProductItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Para ter acesso ao SnackBar mesmo em um método assíncrono
+    final scaffold = Scaffold.of(context);
+
     return ListTile(
       leading: CircleAvatar(
         backgroundImage: NetworkImage(product.imageUrl),
@@ -44,19 +48,13 @@ class ProductItem extends StatelessWidget {
                           actions: <Widget>[
                             FlatButton(
                               onPressed: () {
-                                /*
-                                Não é necessário ouvir esse provider pois ele
-                                não é responsável pela atualização da tela
-                                */
-                                Provider.of<Products>(context, listen: false)
-                                    .deleteProduct(product.id);
-                                Navigator.of(ctx).pop();
+                                Navigator.of(ctx).pop(true);
                               },
                               child: Text('Confirmar'),
                             ),
                             FlatButton(
                               onPressed: () {
-                                Navigator.of(ctx).pop();
+                                Navigator.of(ctx).pop(false);
                               },
                               child: Text(
                                 'Desfazer',
@@ -64,7 +62,29 @@ class ProductItem extends StatelessWidget {
                               ),
                             ),
                           ],
-                        ));
+                        )).then((value) async {
+                  if (value) {
+                    try {
+                      /*
+                                Não é necessário ouvir esse provider pois ele
+                                não é responsável pela atualização da tela
+                                */
+                      await Provider.of<Products>(context, listen: false)
+                          .deleteProduct(product.id);
+                    } on HttpException catch (err) {
+                      /*
+                      Assim você captura o tratamento de erro que você mesmo inseriu
+                      Lembrando que é necessário o throw HttpException
+                      quando o statusCode é o que deseja tratar
+                      Todo o tratamento ocorre em products
+                      */
+                      print(err.toString());
+                      scaffold.showSnackBar(SnackBar(
+                        content: Text(err.toString()),
+                      ));
+                    }
+                  }
+                });
               },
             ),
           ],

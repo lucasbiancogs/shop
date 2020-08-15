@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import '../exceptions/http_exception.dart';
 
 import 'product.dart';
 
@@ -48,6 +49,7 @@ class Products with ChangeNotifier {
           description: productData['description'],
           price: productData['price'],
           imageUrl: productData['imageUrl'],
+          isFavorite: productData['isFavorite'],
         ));
       });
 
@@ -131,13 +133,27 @@ class Products with ChangeNotifier {
     }
   }
 
-  void deleteProduct(String id) {
+  Future<void> deleteProduct(String id) async {
     final index = _items.indexWhere((prod) => prod.id == id);
 
     if (index >= 0) {
-      _items.removeWhere((prod) => prod.id == id);
-
+      /*
+      Essa é uma exclusão otimista, no caso vamos excluir diretamente
+      e depois fazer a requisição http
+      caso ele encontre um statusCode de erro ele inclui novamente
+      e alerta sobre o erro
+      */
+      final product = _items[index];
+      _items.remove(product);
       notifyListeners();
+
+      final response = await http.delete("$_baseUrl/${product.id}.json");
+
+      if (response.statusCode >= 400) {
+        _items.insert(index, product);
+        notifyListeners();
+        throw HttpException('Ocorreu um erro na exclusão do produto.');
+      }
     }
   }
 }
