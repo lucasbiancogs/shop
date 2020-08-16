@@ -23,30 +23,29 @@ class Product with ChangeNotifier {
     this.isFavorite = false,
   });
 
-  Future<void> toggleFavorite() async {
+  void _toggleFavorite() {
     isFavorite = !isFavorite;
     notifyListeners();
+  }
 
-    print(id);
-    print(isFavorite);
+  Future<void> toggleFavorite() async {
+    try {
+      _toggleFavorite();
 
-    final response = await http.patch(
-      '$_baseUrl/$id.json',
-      body: json.encode({
-        'title': title,
-        'description': description,
-        'price': price,
-        'imageUrl': imageUrl,
-        'isFavorite': isFavorite,
-      }),
-    );
+      final response = await http.patch(
+        '$_baseUrl/$id.json',
+        body: json.encode({
+          'isFavorite': isFavorite,
+        }),
+      );
 
-    print(response.statusCode);
-
-    if (response.statusCode >= 400) {
-      isFavorite = !isFavorite;
-      notifyListeners();
-      throw HttpException('Ocorreu um erro ao favoritar o produto.');
+      if (response.statusCode >= 400) {
+        _toggleFavorite();
+        throw HttpException('Ocorreu um erro ao favoritar o produto.');
+      }
+    } catch (err) {
+      _toggleFavorite();
+      print(err);
     }
   }
 }
