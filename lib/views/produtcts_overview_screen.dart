@@ -22,14 +22,28 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
   bool _showFavoriteOnly = false;
   bool _isLoading = true;
 
-  @override
-  void initState() {
-    super.initState();
-    Provider.of<Products>(context, listen: false).loadProducts().then((_) {
+  Future<void> _loadProducts() async {
+    try {
+      await Provider.of<Products>(context, listen: false)
+          .loadProducts()
+          .then((_) {
+        setState(() {
+          _isLoading = false;
+        });
+      });
+    } catch (err) {
       setState(() {
         _isLoading = false;
       });
-    });
+      // Implementar esse snackBar
+      //Scaffold.of(context).showSnackBar(SnackBar(content: Text(err.toString())));
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProducts();
   }
 
   @override
@@ -94,8 +108,10 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
       ),
       body: _isLoading
           ? Center(
-              child: CircularProgressIndicator(),
-            )
+              child: CircularProgressIndicator(
+              valueColor:
+                  AlwaysStoppedAnimation(Theme.of(context).primaryColor),
+            ))
           : ProductGrid(_showFavoriteOnly),
       drawer: AppDrawer(),
     );

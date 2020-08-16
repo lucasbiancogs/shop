@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import '../exceptions/http_exception.dart';
@@ -36,24 +37,33 @@ class Products with ChangeNotifier {
       _items.where((prod) => prod.isFavorite).toList();
 
   Future<void> loadProducts() async {
-    final response = await http.get("$_baseUrl.json");
-    Map<String, dynamic> data = json.decode(response.body);
+    try {
+      final response = await http.get("$_baseUrl.json");
+      Map<String, dynamic> data = json.decode(response.body);
 
-    _items.clear();
+      _items.clear();
 
-    if (data != null) {
-      data.forEach((productId, productData) {
-        _items.add(Product(
-          id: productId,
-          title: productData['title'],
-          description: productData['description'],
-          price: productData['price'],
-          imageUrl: productData['imageUrl'],
-          isFavorite: productData['isFavorite'],
-        ));
-      });
+      if (data != null) {
+        data.forEach((productId, productData) {
+          _items.add(Product(
+            id: productId,
+            title: productData['title'],
+            description: productData['description'],
+            price: productData['price'],
+            imageUrl: productData['imageUrl'],
+            isFavorite: productData['isFavorite'],
+          ));
+        });
 
+        notifyListeners();
+      }
+    } on SocketException catch (err) {
       notifyListeners();
+      print(err);
+      throw HttpException('Falha na conexão');
+    } catch (err) {
+      notifyListeners();
+      print(err);
     }
     return Future.value();
   }
@@ -147,12 +157,23 @@ class Products with ChangeNotifier {
       _items.remove(product);
       notifyListeners();
 
-      final response = await http.delete("$_baseUrl/${product.id}.json");
+      try {
+        final response = await http.delete("$_baseUrl/${product.id}.json");
 
-      if (response.statusCode >= 400) {
+        if (response.statusCode >= 400) {
+          _items.insert(index, product);
+          notifyListeners();
+          throw HttpException('Ocorreu um erro na exclusão do produto.');
+        }
+      } on SocketException catch (err) {
         _items.insert(index, product);
         notifyListeners();
-        throw HttpException('Ocorreu um erro na exclusão do produto.');
+        print(err);
+        throw HttpException('Falha na conexão.');
+      } catch (err) {
+        _items.insert(index, product);
+        notifyListeners();
+        print(err);
       }
     }
   }
