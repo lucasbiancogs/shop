@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 import 'cart.dart';
 import '../exceptions/http_exception.dart';
+import '../utils/constants.dart';
 
 class Order {
   final String id;
@@ -21,7 +22,7 @@ class Order {
 }
 
 class Orders with ChangeNotifier {
-  final String _baseUrl = 'https://shop-lucasbianco.firebaseio.com/orders';
+  final String _baseUrl = '${Constants.BASE_API_URL}/orders';
   List<Order> _items = [];
 
   List<Order> get items {

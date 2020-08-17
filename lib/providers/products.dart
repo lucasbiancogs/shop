@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import '../exceptions/http_exception.dart';
 
+import '../exceptions/http_exception.dart';
 import 'product.dart';
+import '../utils/constants.dart';
 
 class Products with ChangeNotifier {
-  final String _baseUrl = 'https://shop-lucasbianco.firebaseio.com/products';
+  final String _baseUrl = '${Constants.BASE_API_URL}/products';
   /*
   Esse mixin ChangeNotifier está fortemente atrelado ao design pattern 
   de observers
