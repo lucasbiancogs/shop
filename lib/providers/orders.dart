@@ -38,8 +38,6 @@ class Orders with ChangeNotifier {
       final response = await http.get("$_baseUrl.json");
       Map<String, dynamic> data = json.decode(response.body);
 
-      print(data);
-
       if (data != null) {
         data.forEach((orderId, orderData) {
           loadedItems.add(

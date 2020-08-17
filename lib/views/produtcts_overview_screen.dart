@@ -21,26 +21,14 @@ class ProductOverviewScreen extends StatefulWidget {
 
 class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
   bool _showFavoriteOnly = false;
-  bool _isLoading = true;
 
   Future<void> _loadProducts() async {
     try {
-      await Provider.of<Products>(context, listen: false).loadProducts();
-      setState(() {
-        _isLoading = false;
-      });
+      return Provider.of<Products>(context, listen: false).loadProducts();
     } on HttpException catch (err) {
-      setState(() {
-        _isLoading = false;
-      });
       print(err);
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _loadProducts();
+    return Future.value();
   }
 
   @override
@@ -103,13 +91,20 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
           )
         ],
       ),
-      body: _isLoading
-          ? Center(
-              child: CircularProgressIndicator(
+      body: FutureBuilder(
+        future: _loadProducts(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+                child: CircularProgressIndicator(
               valueColor:
                   AlwaysStoppedAnimation(Theme.of(context).primaryColor),
-            ))
-          : RefreshIndicatorWidget(_showFavoriteOnly),
+            ));
+          } else {
+            return RefreshIndicatorWidget(_showFavoriteOnly);
+          }
+        },
+      ),
       drawer: AppDrawer(),
     );
   }
