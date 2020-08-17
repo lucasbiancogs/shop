@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shop/exceptions/http_exception.dart';
 
 import '../utils/app_routes.dart';
 import '../providers/products.dart';
@@ -30,13 +31,13 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
         setState(() {
           _isLoading = false;
         });
+        return true;
       });
-    } catch (err) {
+    } on HttpException catch (err) {
       setState(() {
         _isLoading = false;
       });
-      // Implementar esse snackBar
-      //Scaffold.of(context).showSnackBar(SnackBar(content: Text(err.toString())));
+      print(err);
     }
   }
 
@@ -112,8 +113,35 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
               valueColor:
                   AlwaysStoppedAnimation(Theme.of(context).primaryColor),
             ))
-          : ProductGrid(_showFavoriteOnly),
+          : RefreshIndicatorWidget(_showFavoriteOnly),
       drawer: AppDrawer(),
+    );
+  }
+}
+
+class RefreshIndicatorWidget extends StatelessWidget {
+  final bool _showFavoriteOnly;
+
+  RefreshIndicatorWidget(this._showFavoriteOnly);
+
+  Future<void> _refreshProducts(BuildContext context) async {
+    await Provider.of<Products>(context, listen: false).loadProducts();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      color: Theme.of(context).primaryColor,
+      child: ProductGrid(_showFavoriteOnly),
+      onRefresh: () async {
+        try {
+          await _refreshProducts(context);
+        } on HttpException catch (err) {
+          Scaffold.of(context).showSnackBar(SnackBar(
+            content: Text(err.toString()),
+          ));
+        }
+      },
     );
   }
 }
