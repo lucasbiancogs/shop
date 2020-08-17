@@ -25,13 +25,9 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
 
   Future<void> _loadProducts() async {
     try {
-      await Provider.of<Products>(context, listen: false)
-          .loadProducts()
-          .then((_) {
-        setState(() {
-          _isLoading = false;
-        });
-        return true;
+      await Provider.of<Products>(context, listen: false).loadProducts();
+      setState(() {
+        _isLoading = false;
       });
     } on HttpException catch (err) {
       setState(() {

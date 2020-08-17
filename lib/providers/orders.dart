@@ -1,9 +1,10 @@
 import 'dart:convert';
-import 'dart:math';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import 'cart.dart';
+import '../exceptions/http_exception.dart';
 
 class Order {
   final String id;
@@ -29,6 +30,48 @@ class Orders with ChangeNotifier {
 
   int get itemsCount {
     return _items.length;
+  }
+
+  Future<void> loadOrders() async {
+    try {
+      List<Order> loadedItems = [];
+      final response = await http.get("$_baseUrl.json");
+      Map<String, dynamic> data = json.decode(response.body);
+
+      print(data);
+
+      if (data != null) {
+        data.forEach((orderId, orderData) {
+          loadedItems.add(
+            Order(
+              id: orderId,
+              total: orderData['total'],
+              date: DateTime.parse(orderData['date']),
+              products: (orderData['products'] as List<dynamic>).map((item) {
+                return CartItem(
+                  id: item['id'],
+                  price: item['price'],
+                  productId: item['productId'],
+                  quantity: item['quantity'],
+                  title: item['title'],
+                );
+              }).toList(),
+            ),
+          );
+        });
+
+        _items = loadedItems.reversed.toList();
+        notifyListeners();
+      }
+    } on SocketException catch (err) {
+      notifyListeners();
+      print(err);
+      throw HttpException('Falha na conexão');
+    } catch (err) {
+      notifyListeners();
+      print(err);
+    }
+    return Future.value();
   }
 
   Future<void> addOrder(Cart cart) async {
