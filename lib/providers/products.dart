@@ -9,6 +9,7 @@ import '../utils/constants.dart';
 
 class Products with ChangeNotifier {
   final String _baseUrl = '${Constants.BASE_API_URL}/products';
+
   /*
   Esse mixin ChangeNotifier está fortemente atrelado ao design pattern 
   de observers
@@ -17,8 +18,11 @@ class Products with ChangeNotifier {
   Por exemplo, adicionando um produto à lista de produtos
   O catálogo será notificado e irá se atualizar para refletir isso
   */
-
   List<Product> _items = [];
+
+  String _token;
+
+  Products([this._token = '', this._items = const []]);
 
   /*
   É importante copiar a lista através de um spread para devolvê-la em um getter
@@ -27,7 +31,6 @@ class Products with ChangeNotifier {
   Assim o único modo de acessar a lista é através dos métodos de Products
   assim não se perde o controle das mudanças
   */
-
   List<Product> get items => [..._items];
 
   int get itemsCount {
@@ -39,7 +42,7 @@ class Products with ChangeNotifier {
 
   Future<void> loadProducts() async {
     try {
-      final response = await http.get("$_baseUrl.json");
+      final response = await http.get("$_baseUrl.json?auth=$_token");
       Map<String, dynamic> data = json.decode(response.body);
 
       _items.clear();
@@ -97,7 +100,7 @@ class Products with ChangeNotifier {
     mais síncrona
     */
     final response = await http.post(
-      "$_baseUrl.json",
+      "$_baseUrl.json?auth=$_token",
       body: json.encode({
         'title': newProduct.title,
         'description': newProduct.description,
@@ -130,7 +133,7 @@ class Products with ChangeNotifier {
 
     if (index >= 0) {
       await http.patch(
-        "$_baseUrl/${product.id}.json",
+        "$_baseUrl/${product.id}.json?auth=$_token",
         body: json.encode({
           'title': product.title,
           'description': product.description,
@@ -159,7 +162,7 @@ class Products with ChangeNotifier {
       notifyListeners();
 
       try {
-        final response = await http.delete("$_baseUrl/${product.id}.json");
+        final response = await http.delete("$_baseUrl/${product.id}.json?auth=$_token");
 
         if (response.statusCode >= 400) {
           _items.insert(index, product);

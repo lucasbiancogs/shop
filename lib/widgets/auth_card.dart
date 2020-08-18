@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../exceptions/auth_exception.dart';
 import '../providers/auth.dart';
 
 enum AuthMode {
@@ -22,6 +26,23 @@ class _AuthCardState extends State<AuthCard> {
     'password': '',
   };
 
+  void _showErrorDialog(String msg) {
+    showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+              title: Text('Ocorreu um erro'),
+              content: Text(msg),
+              actions: <Widget>[
+                FlatButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Ok'),
+                ),
+              ],
+            ));
+  }
+
   final _passwordControler = TextEditingController();
 
   Future<void> _submit() async {
@@ -37,16 +58,25 @@ class _AuthCardState extends State<AuthCard> {
 
     Auth auth = Provider.of<Auth>(context, listen: false);
 
-    if (_authMode == AuthMode.Login) {
-      await auth.login(
-        _authData['email'],
-        _authData['password'],
-      );
-    } else {
-      await auth.singup(
-        _authData['email'],
-        _authData['password'],
-      );
+    try {
+      if (_authMode == AuthMode.Login) {
+        await auth.login(
+          _authData['email'],
+          _authData['password'],
+        );
+      } else {
+        await auth.singup(
+          _authData['email'],
+          _authData['password'],
+        );
+      }
+    } on AuthException catch (error) {
+      _showErrorDialog(error.toString());
+    } on SocketException catch (_) {
+      _showErrorDialog('Falha na conexão');
+    } catch (error) {
+      _showErrorDialog('Ocorreu um erro inexperado.');
+      print(error);
     }
 
     setState(() {
@@ -126,27 +156,32 @@ class _AuthCardState extends State<AuthCard> {
                       AlwaysStoppedAnimation(Theme.of(context).primaryColor),
                 )
               else
-                RaisedButton(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  color: Theme.of(context).primaryColor,
-                  textColor: Theme.of(context).accentTextTheme.headline6.color,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 30,
-                    vertical: 8,
-                  ),
-                  child: Text(
-                      _authMode == AuthMode.Login ? 'ENTRAR' : 'REGISTRAR'),
-                  onPressed: _submit,
-                ),
-              FlatButton(
-                onPressed: _switchAuthMode,
-                child: Text(_authMode == AuthMode.Login
-                    ? 'Não possuo um cadastro.'
-                    : 'Já possuo cadastro.'),
-                textColor: Theme.of(context).primaryColor,
-              )
+                Column(
+                  children: [
+                    RaisedButton(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      color: Theme.of(context).primaryColor,
+                      textColor:
+                          Theme.of(context).accentTextTheme.headline6.color,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 8,
+                      ),
+                      child: Text(
+                          _authMode == AuthMode.Login ? 'ENTRAR' : 'REGISTRAR'),
+                      onPressed: _submit,
+                    ),
+                    FlatButton(
+                      onPressed: _switchAuthMode,
+                      child: Text(_authMode == AuthMode.Login
+                          ? 'Não possuo um cadastro.'
+                          : 'Já possuo cadastro.'),
+                      textColor: Theme.of(context).primaryColor,
+                    )
+                  ],
+                )
             ],
           ),
         ),
