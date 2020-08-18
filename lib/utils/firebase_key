@@ -1,6 +1,7 @@
 // Insert .dart at the end of the file
 
-// Insert your API_KEY on Firebase
+// Insert your own API_KEY on Firebase, you will find it within your project configuration
+// on Firebase
 class FirebaseKey {
   static const API_KEY = '';
 }
