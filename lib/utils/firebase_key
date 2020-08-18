@@ -1,0 +1,6 @@
+// Insert .dart at the end of the file
+
+// Insert your API_KEY on Firebase
+class FirebaseKey {
+  static const API_KEY = '';
+}

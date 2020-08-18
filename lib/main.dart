@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'utils/app_routes.dart';
 import 'views/orders_screen.dart';
+import 'views/auth_screen.dart';
 import 'views/cart_screen.dart';
 import 'views/produtcts_overview_screen.dart';
 import 'views/product_detail_screen.dart';
@@ -48,8 +49,9 @@ class MyApp extends StatelessWidget {
         Caso quisesse nomear de outra forma deveria tirar a propriedade home:
         e dentro de routes definir o home como qualquer outra rota
         */
-        home: ProductOverviewScreen(),
+        home: AuthScreen(),
         routes: {
+          AppRoutes.HOME: (ctx) => ProductOverviewScreen(),
           AppRoutes.PRODUCT_DETAIL: (ctx) => ProductDetailScreen(),
           AppRoutes.CART: (ctx) => CartScreen(),
           AppRoutes.ORDERS: (ctx) => OrdersScreen(),

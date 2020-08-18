@@ -1,3 +1,6 @@
+# Firebase Keys
+lib/utils/firebase_key.dart
+
 # Miscellaneous
 *.class
 *.log
