@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shop/exceptions/http_exception.dart';
-import 'package:shop/providers/cart.dart';
 
+import '../exceptions/http_exception.dart';
+import '../providers/auth.dart';
+import '../providers/cart.dart';
 import '../providers/product.dart';
 import '../utils/app_routes.dart';
 
@@ -11,6 +12,7 @@ class ProductGridItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final Product product = Provider.of(context, listen: false);
     final Cart cart = Provider.of(context, listen: false);
+    final Auth auth = Provider.of(context, listen: false);
     final scaffold = Scaffold.of(context);
 
     return ClipRRect(
@@ -40,12 +42,12 @@ class ProductGridItem extends StatelessWidget {
                   product.isFavorite ? Icons.favorite : Icons.favorite_border),
               onPressed: () async {
                 try {
-                  await product.toggleFavorite();
+                  await product.toggleFavorite(auth.token, auth.userId);
                 } on HttpException catch (err) {
                   print(err.toString());
-                  scaffold.showSnackBar(
-                    SnackBar(content: Text(err.toString()),)
-                  );
+                  scaffold.showSnackBar(SnackBar(
+                    content: Text(err.toString()),
+                  ));
                 }
               },
               color: Theme.of(context).accentColor,

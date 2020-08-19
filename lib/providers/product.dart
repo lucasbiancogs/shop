@@ -6,7 +6,6 @@ import '../exceptions/http_exception.dart';
 import '../utils/constants.dart';
 
 class Product with ChangeNotifier {
-  final String _baseUrl = '${Constants.BASE_API_URL}/products';
 
   final String id;
   final String title;
@@ -29,15 +28,12 @@ class Product with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> toggleFavorite() async {
-    try {
+  Future<void> toggleFavorite(String token, String userId) async {
       _toggleFavorite();
-
-      final response = await http.patch(
-        '$_baseUrl/$id.json',
-        body: json.encode({
-          'isFavorite': isFavorite,
-        }),
+    try {
+      final response = await http.put(
+        '${Constants.BASE_API_URL}/userFavorites/$userId/$id.json?auth=$token',
+        body: json.encode(isFavorite),
       );
 
       if (response.statusCode >= 400) {

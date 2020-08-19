@@ -21,8 +21,9 @@ class Products with ChangeNotifier {
   List<Product> _items = [];
 
   String _token;
+  String _userId;
 
-  Products([this._token = '', this._items = const []]);
+  Products([this._token, this._userId, this._items = const []]);
 
   /*
   É importante copiar a lista através de um spread para devolvê-la em um getter
@@ -45,17 +46,24 @@ class Products with ChangeNotifier {
       final response = await http.get("$_baseUrl.json?auth=$_token");
       Map<String, dynamic> data = json.decode(response.body);
 
+      final favResponse = await http.get(
+          "${Constants.BASE_API_URL}/userFavorites/$_userId.json?auth=$_token");
+
+      final favMap = json.decode(favResponse.body);
+
       _items.clear();
 
       if (data != null) {
         data.forEach((productId, productData) {
+          final isFavorite =
+              favMap == null ? false : favMap[productId] ?? false;
           _items.add(Product(
             id: productId,
             title: productData['title'],
             description: productData['description'],
             price: productData['price'],
             imageUrl: productData['imageUrl'],
-            isFavorite: productData['isFavorite'],
+            isFavorite: isFavorite,
           ));
         });
 
@@ -106,7 +114,6 @@ class Products with ChangeNotifier {
         'description': newProduct.description,
         'price': newProduct.price,
         'imageUrl': newProduct.imageUrl,
-        'isFavorite': newProduct.isFavorite,
       }),
     );
 
@@ -162,7 +169,8 @@ class Products with ChangeNotifier {
       notifyListeners();
 
       try {
-        final response = await http.delete("$_baseUrl/${product.id}.json?auth=$_token");
+        final response =
+            await http.delete("$_baseUrl/${product.id}.json?auth=$_token");
 
         if (response.statusCode >= 400) {
           _items.insert(index, product);

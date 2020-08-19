@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import 'utils/app_routes.dart';
 import 'views/auth_or_home.dart';
-import 'views/produtcts_overview_screen.dart';
 import 'views/orders_screen.dart';
 import 'views/cart_screen.dart';
 import 'views/product_detail_screen.dart';
@@ -29,7 +28,7 @@ class MyApp extends StatelessWidget {
           create: (_) => new Auth(),
         ),
         ChangeNotifierProxyProvider<Auth, Products>(
-          create: (_) => Products(),
+          create: (_) => new Products(),
           /*
           O proxy provider pega pelo generics um outro provider
           e o usa para construir os providers filhos
@@ -37,16 +36,22 @@ class MyApp extends StatelessWidget {
           Aqui usamos o auth para pegar o token
           e também os antigo produtos
           */
-          update: (_, auth, previousProducts) => new Products(
+          update: (_, auth, previousProducts) => Products(
             auth.token,
+            auth.userId,
             previousProducts.items,
+          ),
+        ),
+        ChangeNotifierProxyProvider<Auth, Orders>(
+          create: (_) => new Orders(),
+          update: (_, auth, previousOrders) => Orders(
+            auth.token,
+            auth.userId,
+            previousOrders.items
           ),
         ),
         ChangeNotifierProvider(
           create: (_) => new Cart(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => new Orders(),
         ),
       ],
       child: MaterialApp(
@@ -66,7 +71,6 @@ class MyApp extends StatelessWidget {
         */
         home: AuthOrHome(),
         routes: {
-          AppRoutes.HOME: (ctx) => ProductOverviewScreen(),
           AppRoutes.PRODUCT_DETAIL: (ctx) => ProductDetailScreen(),
           AppRoutes.CART: (ctx) => CartScreen(),
           AppRoutes.ORDERS: (ctx) => OrdersScreen(),
