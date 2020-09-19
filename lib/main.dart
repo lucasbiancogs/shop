@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'utils/custom_route.dart';
 import 'utils/app_routes.dart';
 import 'views/auth_or_home.dart';
 import 'views/orders_screen.dart';
@@ -60,6 +61,12 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.teal,
           accentColor: Colors.deepOrange,
           fontFamily: 'Lato',
+          pageTransitionsTheme: PageTransitionsTheme(
+            builders: {
+              TargetPlatform.android: CustomPageTransitionBuilder(),
+              TargetPlatform.iOS: CustomPageTransitionBuilder(),
+            }
+          )
         ),
         /*
         Por possuir o home já definido não é necessário declará-lo novamente
