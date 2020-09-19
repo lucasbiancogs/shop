@@ -48,8 +48,6 @@ class _AuthCardState extends State<AuthCard>
         curve: Curves.linear,
       ),
     );
-
-    _heightAnimation.addListener(() => setState(() {}));
   }
 
   @override
@@ -139,10 +137,14 @@ class _AuthCardState extends State<AuthCard>
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10.0),
       ),
-      child: Container(
-        height: _heightAnimation.value.height,
-        width: deviceSize.width * 0.8,
-        padding: EdgeInsets.all(16.0),
+      child: AnimatedBuilder(
+        animation: _heightAnimation,
+        builder: (context, child) => Container(
+          height: _heightAnimation.value.height,
+          width: deviceSize.width * 0.8,
+          padding: EdgeInsets.all(16.0),
+          child: child,
+        ),
         child: Form(
           key: _form,
           child: Column(
